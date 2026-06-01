@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZORO - Premium Men's Store</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+    body{background:#0b0b0b;color:#fff;}
+
+    header{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:20px 50px;background:#000;border-bottom:1px solid #222;
+    }
+
+    .logo{display:flex;align-items:center;gap:10px;}
+    .logo img{width:40px;}
+    .logo h1{color:#fff;letter-spacing:2px;}
+
+    nav a{margin:0 15px;cursor:pointer;color:#ccc;}
+    nav a:hover{color:#d4af37;}
+
+    .section{display:none;padding:40px;}
+    .active{display:block;}
+
+    .hero{
+      height:80vh;display:flex;align-items:center;justify-content:space-between;
+      padding:50px;
+      background:linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)),
+      url('https://images.unsplash.com/photo-1520975916090-3105956dac38');
+      background-size:cover;
+    }
+
+    .hero-text{max-width:500px;}
+    .hero h2{font-size:3rem;}
+    .hero span{color:#d4af37;}
+
+    .btn{
+      padding:12px 25px;background:#d4af37;border:none;border-radius:5px;color:#000;font-weight:bold;
+    }
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;}
+
+    .card{
+      background:#111;padding:15px;border-radius:10px;text-align:center;
+    }
+
+    .card img{width:100%;border-radius:10px;}
+
+    .cart{
+      position:fixed;top:100px;right:20px;background:#111;padding:15px;border-radius:10px;width:250px;
+    }
+
+    input{padding:10px;margin:5px;width:100%;border:none;border-radius:5px;}
+
+    .login-box{max-width:320px;margin:100px auto;background:#111;padding:20px;border-radius:10px;}
+
+    table{width:100%;margin-top:20px;border-collapse:collapse;}
+    th,td{padding:10px;border-bottom:1px solid #333;}
+
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">
+    <img src="/mnt/data/a_clean_high_end_branding_logo_image_on_a_black_b.png" style="width:50px;height:auto;">
+    <h1>ZORO</h1>
+  </div>
+  <nav>
+    <a onclick="showSection('home')">Home</a>
+    <a onclick="showSection('store')">Shop</a>
+    <a onclick="showSection('adminLogin')">Admin</a>
+  </nav>
+</header>
+
+<section id="home" class="section active hero">
+  <div class="hero-text">
+    <h2>STYLE THAT DEFINES <span>YOU</span></h2>
+    <p>Premium clothing crafted for modern men.</p>
+    <button class="btn" onclick="showSection('store')">Shop Now</button>
+  </div>
+</section>
+
+<section id="store" class="section">
+  <h2>Featured Products</h2>
+  <div class="grid" id="productList"></div>
+</section>
+
+<div class="cart">
+  <h3>Cart</h3>
+  <ul id="cartItems"></ul>
+  <p>Total: ₹<span id="total">0</span></p>
+</div>
+
+<section id="adminLogin" class="section">
+  <div class="login-box">
+    <h2>Admin Login</h2>
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
+    <button class="btn" onclick="login()">Login</button>
+    <p style="color:#aaa">admin / 1234</p>
+  </div>
+</section>
+
+<section id="adminPanel" class="section">
+  <h2>Dashboard</h2>
+
+  <input id="pname" placeholder="Product Name">
+  <input id="pprice" placeholder="Price">
+  <input id="pimg" placeholder="Image URL">
+  <button class="btn" onclick="addProduct()">Add Product</button>
+
+  <table>
+    <thead><tr><th>Name</th><th>Price</th><th>Action</th></tr></thead>
+    <tbody id="adminTable"></tbody>
+  </table>
+</section>
+
+<script>
+let products = JSON.parse(localStorage.getItem('products')) || [
+  {name:'Black Jacket',price:2499,img:'https://images.unsplash.com/photo-1520975916090-3105956dac38'},
+  {name:'White Shirt',price:1599,img:'https://images.unsplash.com/photo-1512436991641-6745cdb1723f'}
+];
+
+let cart=[];
+
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  displayProducts();
+  displayAdmin();
+}
+
+function displayProducts(){
+  let list=document.getElementById('productList');
+  list.innerHTML='';
+
+  products.forEach((p,i)=>{
+    list.innerHTML+=`
+    <div class="card">
+      <img src="${p.img}">
+      <h3>${p.name}</h3>
+      <p>₹${p.price}</p>
+      <button class="btn" onclick="addToCart(${i})">Add to Cart</button>
+    </div>`;
+  });
+}
+
+function addToCart(i){
+  cart.push(products[i]);
+  updateCart();
+}
+
+function updateCart(){
+  let list=document.getElementById('cartItems');
+  let total=0;
+  list.innerHTML='';
+
+  cart.forEach(p=>{
+    total+=Number(p.price);
+    list.innerHTML+=`<li>${p.name} - ₹${p.price}</li>`;
+  });
+
+  document.getElementById('total').innerText=total;
+}
+
+function displayAdmin(){
+  let table=document.getElementById('adminTable');
+  table.innerHTML='';
+
+  products.forEach((p,i)=>{
+    table.innerHTML+=`
+    <tr>
+      <td>${p.name}</td>
+      <td>${p.price}</td>
+      <td><button onclick="deleteProduct(${i})">Delete</button></td>
+    </tr>`;
+  });
+}
+
+function addProduct(){
+  let name=pname.value;
+  let price=pprice.value;
+  let img=pimg.value;
+
+  products.push({name,price,img});
+  localStorage.setItem('products',JSON.stringify(products));
+  displayAdmin();
+}
+
+function deleteProduct(i){
+  products.splice(i,1);
+  localStorage.setItem('products',JSON.stringify(products));
+  displayAdmin();
+}
+
+function login(){
+  if(username.value==='admin' && password.value==='1234'){
+    showSection('adminPanel');
+  }else{
+    alert('Wrong credentials');
+  }
+}
+
+showSection('home');
+</script>
+
+</body>
+</html>
